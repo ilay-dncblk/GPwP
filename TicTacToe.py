@@ -1,102 +1,155 @@
 import random
-oyuntahtasi=[' ' for x in range(10)]
 
-def ekrangöster():
-    print(' '+oyuntahtasi[1]+'-'+'-'+oyuntahtasi[2]+'-'+'-'+oyuntahtasi[3])
-    print('|'+' '+' '+'|'+' '+' '+'|')
-    print(' '+oyuntahtasi[4]+'-'+'-'+oyuntahtasi[5]+'-'+'-'+oyuntahtasi[6])
-    print('|'+' '+' '+'|'+' '+' '+'|')
-    print(' '+oyuntahtasi[7]+'-'+'-'+oyuntahtasi[8]+'-'+'-'+oyuntahtasi[9])
-
-def üctas(harf,konum):
-    oyuntahtasi[konum]=harf
-
-def alanbosmu(konum):
-    return oyuntahtasi[konum] ==' '
-
-def tahtadolu():
-    if oyuntahtasi.count(' ')>1:
-        return False
-    else:
-        return True
-
-def kazanan(oyuntahtasi,harf):
-    return (oyuntahtasi[1]==harf and oyuntahtasi[2]==harf and oyuntahtasi[3]==harf) or \
-        (oyuntahtasi[4]==harf and oyuntahtasi[5]==harf and oyuntahtasi[6]==harf) or \
-        (oyuntahtasi[7]==harf and oyuntahtasi[8]==harf and oyuntahtasi[9]==harf) or \
-        (oyuntahtasi[1]==harf and oyuntahtasi[4]==harf and oyuntahtasi[7]==harf) or \
-        (oyuntahtasi[3]==harf and oyuntahtasi[5]==harf and oyuntahtasi[7]==harf) or \
-        (oyuntahtasi[1]==harf and oyuntahtasi[5]==harf and oyuntahtasi[9]==harf) or \
-        (oyuntahtasi[2]==harf and oyuntahtasi[5]==harf and oyuntahtasi[8]==harf) or \
-        (oyuntahtasi[3]==harf and oyuntahtasi[6]==harf and oyuntahtasi[9]==harf)
-  
-def oyuncuhareketi():
-    konum=int(input("1-9 arasında bir konum giriniz :"))
-    if alanbosmu(konum):
-        üctas('X',konum)
-        if kazanan(oyuntahtasi,'X'):
-            ekrangöster()
-            print("kazandınız.")
-            exit()
-        ekrangöster()
-    else:
-        print("Girdiğiniz alan dolu, Tekrar konum giriniz:")
-        oyuncuhareketi()
-
-def pchareket():
-    musaitkonumlar = [konum for konum, harf in enumerate(oyuntahtasi) if harf == ' ' and konum != 0]
-
-    hareket = 0
-
-    for harf in ['O','X']:
-        for i in musaitkonumlar:
-            kopyatahta = oyuntahtasi[:]
-            kopyatahta[i] = harf 
-            if kazanan(kopyatahta, harf):
-                hareket=i
-                return hareket
-    köşeler = []
-
-    for i in musaitkonumlar:
-        if i in [1,3,7,9]:
-            köşeler.append(i)
-    if len(köşeler) > 0:
-        hareket=random.choice(köşeler)
-        return hareket
-    if 5 not in musaitkonumlar:
-        hareket != 5
-        return hareket
+class TicTacToe:
+    def __init__(self):
+        self.board = [' ' for x in range(10)]
+        self.player = 'X'
+        self.computer = 'O'
     
-    içerisi = []
 
-    for i in musaitkonumlar:
-        if i in [2,4,5,6,8]:
-            içerisi.append(i)
-    if len(içerisi) > 0:
-        hareket=random.choice(içerisi)
-        return hareket
+    def isWinner(self, board, player):
+        return ((board[1] == player and board[2] == player and board[3] == player) or
+                (board[4] == player and board[5] == player and board[6] == player) or
+                (board[7] == player and board[8] == player and board[9] == player) or
+                (board[1] == player and board[4] == player and board[7] == player) or
+                (board[2] == player and board[5] == player and board[8] == player) or
+                (board[3] == player and board[6] == player and board[9] == player) or
+                (board[1] == player and board[5] == player and board[9] == player) or
+                (board[3] == player and board[5] == player and board[7] == player))
+    
+    def isBoardFull(self, board):
+        if board.count(' ') > 1:
+            return False
+        else:
+            return True
+        
+    def makeMove(self, board, player, move):
+        board[move] = player
 
-def oyun():
-    print("XOX oyununa hoşgeldiniz.")
-    ekrangöster()
-    while not tahtadolu():
-        oyuncuhareketi()
-        if tahtadolu():
-            print("Oyun berabere bitti.")
-            exit()
+    def getBoardCopy(self, board):
+        dupeBoard = []
+        for i in board:
+            dupeBoard.append(i)
+        return dupeBoard
+    
+    def isSpaceFree(self, board, move):
+        return board[move] == ' '
+    
+    def getComputerMove(self, board, computer, player):
+        possibleMoves = [x for x, letter in enumerate(board) if letter == ' ' and x != 0]
+        move = 0
+        for let in [computer, player]:
+            for i in possibleMoves:
+                boardCopy = self.getBoardCopy(board)
+                self.makeMove(boardCopy, let, i)
+                if self.isWinner(boardCopy, let):
+                    move = i
+                    return move
+        cornersOpen = []
+        for i in possibleMoves:
+            if i in [1, 3, 7, 9]:
+                cornersOpen.append(i)
+        if len(cornersOpen) > 0:
+            move = self.selectRandom(cornersOpen)
+            return move
+        if 5 in possibleMoves:
+            move = 5
+            return move
+        edgesOpen = []
+        for i in possibleMoves:
+            if i in [2, 4, 6, 8]:
+                edgesOpen.append(i)
+        if len(edgesOpen) > 0:
+            move = self.selectRandom(edgesOpen)
+        return move
+    
+    def selectRandom(self, li):
+        ln = len(li)
+        r = random.randrange(0, ln)
+        return li[r]
+    
+    def drawBoard(self, board):
+        print(' ' + board[1] + ' | ' + board[2] + ' | ' + board[3])
+        print('-----------')
+        print(' ' + board[4] + ' | ' + board[5] + ' | ' + board[6])
+        print('-----------')
+        print(' ' + board[7] + ' | ' + board[8] + ' | ' + board[9])
 
-        print("--------------------")
-        pc_hareketi = pchareket()
-        üctas('O', pc_hareketi)
-        if kazanan(oyuntahtasi,'O'):
-            ekrangöster()
-            print("Bilgisayar kazandı.")
-            exit()
+    def playGame(self):
+        print('Welcome to Tic Tac Toe!')
+        self.drawBoard(self.board)
+        while not(self.isBoardFull(self.board)):
+            if not(self.isWinner(self.board, self.computer)):
+                self.playerMove()
+                self.drawBoard(self.board)
+            else:
+                print('Sorry, you lose!')
+                break
+            if not(self.isWinner(self.board, self.player)):
+                self.computerMove()
+                self.drawBoard(self.board)
+            else:
+                print('You win!')
+                break
+        if self.isBoardFull(self.board):
+            print('Tie Game!')
 
-        ekrangöster()
-        if tahtadolu():
-            print("Oyun berabere bitti.")
-            exit()
-            print("--------------------")
+    def playerMove(self):
+        run = True
+        while run:
+            move = input('Please select a position to place an \'X\' (1-9): ')
+            try:
+                move = int(move)
+                if move > 0 and move < 10:
+                    if self.isSpaceFree(self.board, move):
+                        run = False
+                        self.makeMove(self.board, self.player, move)
+                    else:
+                        print('Sorry, this space is occupied!')
+                else:
+                    print('Please type a number within the range!')
+            except:
+                print('Please type a number!')
 
-oyun()
+    def computerMove(self):
+        possibleMoves = [x for x, letter in enumerate(self.board) if letter == ' ' and x != 0]
+        move = 0
+        for let in [self.computer, self.player]:
+            for i in possibleMoves:
+                boardCopy = self.getBoardCopy(self.board)
+                self.makeMove(boardCopy, let, i)
+                if self.isWinner(boardCopy, let):
+                    move = i
+                    return self.makeMove(self.board, self.computer, move)
+        cornersOpen = []
+        for i in possibleMoves:
+            if i in [1, 3, 7, 9]:
+                cornersOpen.append(i)
+        if len(cornersOpen) > 0:
+            move = self.selectRandom(cornersOpen)
+            return self.makeMove(self.board, self.computer, move)
+        if 5 in possibleMoves:
+            move = 5
+            return self.makeMove(self.board, self.computer, move)
+        edgesOpen = []
+        for i in possibleMoves:
+            if i in [2, 4, 6, 8]:
+                edgesOpen.append(i)
+        if len(edgesOpen) > 0:
+            move = self.selectRandom(edgesOpen)
+        return self.makeMove(self.board, self.computer, move)
+    
+    def resetBoard(self):
+        self.board = [' ' for x in range(10)]
+
+    def get_current_game(self):
+        return self.board
+    
+    def get_current_player(self):
+        return self.player
+    
+
+
+if __name__ == "__main__":
+    game = TicTacToe()
+    game.playGame()
